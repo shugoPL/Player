@@ -1,0 +1,126 @@
+﻿<Window x:Class="Player.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:Player"
+        xmlns:viewModels="clr-namespace:Player.ViewModels"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="350" Width="525">
+    <Window.DataContext>
+        <viewModels:MainWindowViewModel/>
+    </Window.DataContext>
+    <DockPanel LastChildFill="True">
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Save Playlist" Command="{Binding SavePlaylistCommand}"/>
+                <MenuItem Header="Load Playlist" Command="{Binding LoadPlaylistCommand}"/>
+                <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Media">
+                <MenuItem Header="Add File to Playlist..." Command="{Binding AddFileToPlaylistCommand}"/>
+                <MenuItem Header="Add Folder to Playlist..." Command="{Binding AddFolderToPlaylistCommand}" IsEnabled="False"/>
+            </MenuItem>
+        </Menu>
+        <Grid DockPanel.Dock="Bottom" Height="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Przewijanie do początku utworu lub do poprzedniego -->
+            <Button Grid.Column="0" Margin="3" Command="{Binding RewindToStartCommand}">
+                <Image Source="../Images/skip_previous.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <!-- Uruchamianie zaznaczonego utworu lub pierwszego jeżeli żaden nie jest zaznaczony -->
+            <Button Grid.Column="1" Margin="3" Command="{Binding StartPlaybackCommand}">
+                <!-- Bindowanie do zarządzania jaki obraz na przycisku ma się aktualnie wyświetlać Play/Pause-->
+                <Image Source="{Binding PlayPauseImageSource}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <!-- Zatrzymanie utworu -->
+            <Button Grid.Column="2" Margin="3" Command="{Binding StopPlaybackCommand}">
+                <Image Source="../Images/stop.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <!-- Przewijanie utworu do końca lub do następnego -->
+            <Button Grid.Column="3" Margin="3" Command="{Binding ForwardToEndCommand}">
+                <Image Source="../Images/skip_next.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <!-- Funkcja mieszania utworów z playlisty -->
+            <Button Grid.Column="5" Margin="3" Command="{Binding ShuffleCommand}">
+                <Image Source="../Images/shuffle.png" VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </Button>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Slider odpowiedzialny za pokazywanie pozycji utworu oraz skakanie po utworze -->
+            <Slider Grid.Column="0" Minimum="0" Maximum="{Binding CurrentTrackLength, Mode=OneWay}" 
+                    Value="{Binding CurrentTrackPosition, Mode=TwoWay}" x:Name="SeekbarControl" VerticalAlignment="Center">
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseDown">
+                        <i:InvokeCommandAction Command="{Binding TrackControlMouseDownCommand}"></i:InvokeCommandAction>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="PreviewMouseUp">
+                        <i:InvokeCommandAction Command="{Binding TrackControlMouseUpCommand}"></i:InvokeCommandAction>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Slider>
+            <Image Grid.Column="2" Source="../Images/volume_up.png"/>
+            <Slider Grid.Column="3" Minimum="0" Maximum="1" Value="{Binding CurrentVolume, Mode=TwoWay}" x:Name="VolumeControl" VerticalAlignment="Center">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="ValueChanged">
+                        <i:InvokeCommandAction Command="{Binding VolumeControlValueChangedCommand}"></i:InvokeCommandAction>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Slider>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Now playing: "></TextBlock>
+            <TextBlock Grid.Column="1" Text="{Binding CurrentlyPlayingTrack.FriendlyName, Mode=OneWay}"/>
+            <TextBlock Grid.Column="2" Text="   Time:" />
+            <TextBlock Grid.Column="3" Text="{Binding PresentTrackLen, Mode=TwoWay}" />
+        </Grid>
+
+        <ListView x:Name="Playlist" ItemsSource="{Binding Playlist}" SelectedItem="{Binding CurrentlySelectedTrack, Mode=TwoWay}">
+            <!-- Context menu -->
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Remove" Command="{Binding RemoveItemCommand}" />
+
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <!-- Formatka dla przygotowania wzorca wyświetlania w liście -->
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Path=FriendlyName, Mode=OneWay}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        
+        
+    </DockPanel>
+    
+</Window>
