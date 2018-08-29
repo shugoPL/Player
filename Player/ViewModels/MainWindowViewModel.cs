@@ -23,12 +23,24 @@ namespace Player.ViewModels
         private double _currentTrackPosition;
         private string _playPauseImageSource;
         private float _currentVolume;
-        private string _presentTrackLen;
+        private string _presentTime;
 
         private ObservableCollection<Track> _playlist;
         private Track _currentlyPlayingTrack;
         private Track _currnetlySelectedTrack;
         private AudioPlayer _audioPlayer;
+
+        public string PresentTime
+        {
+            get { return _presentTime; }
+            set
+            {
+                if (value.Equals(_presentTime)) return;
+                _presentTime = value;
+                OnPropertyChanged(nameof(PresentTime));
+            }
+        }
+
 
         public string Title
         {
@@ -118,22 +130,7 @@ namespace Player.ViewModels
                 OnPropertyChanged(nameof(Playlist));
             }
         }
-
-        public string PresentTrackLen
-        {
-            get
-            {
-                TimeSpan t = TimeSpan.FromSeconds(CurrentTrackLength);
-                return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
-            }
-            set
-            {
-                if (value == _presentTrackLen) return;
-                _presentTrackLen = value;
-                OnPropertyChanged(nameof(PresentTrackLen));
-            }
-        }
-
+        
     #region Declaration of Commands 
 
         // Obsługa górnego menu
@@ -337,6 +334,7 @@ namespace Player.ViewModels
                     _audioPlayer.PlaybackStopped += _audioPlayer_PlaybackStopped;
                     CurrentTrackLength = _audioPlayer.GetLenghtInSeconds();
                     CurrentlyPlayingTrack = CurrentlySelectedTrack;
+                    PresentTime = ConvertTime(CurrentTrackLength);
                 }
                 if( CurrentlySelectedTrack == CurrentlyPlayingTrack)
                 {
@@ -381,18 +379,18 @@ namespace Player.ViewModels
         private bool CanForwardToEnd(object obj)
         {
             if (_playbackState == PlaybackState.Playing) return true;
-
             return false; //else
         }
 
         private void Shuffle(object obj)
         {
-            throw new NotImplementedException();
+            Playlist = Playlist.Shuffle();
         }
 
         private bool CanShuffle(object obj)
         {
-            throw new NotImplementedException();
+            if (_playbackState == PlaybackState.Stopped) return true;
+            return false; //else
         }
 
         #endregion
@@ -481,6 +479,14 @@ namespace Player.ViewModels
         {
             UpdateSeekbar();
         }
+
+        public string ConvertTime(double time)
+        {
+            TimeSpan t = TimeSpan.FromSeconds(time);
+            string presentFormat = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
+            return presentFormat;
+        }
+
         
         protected virtual void OnPropertyChanged(string propertyName = null)
         {

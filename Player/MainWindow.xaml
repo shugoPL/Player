@@ -96,7 +96,7 @@
             <TextBlock Grid.Column="0" Text="Now playing: "></TextBlock>
             <TextBlock Grid.Column="1" Text="{Binding CurrentlyPlayingTrack.FriendlyName, Mode=OneWay}"/>
             <TextBlock Grid.Column="2" Text="   Time:" />
-            <TextBlock Grid.Column="3" Text="{Binding PresentTrackLen, Mode=TwoWay}" />
+            <TextBlock Grid.Column="3" Text="{Binding PresentTime}" />
         </Grid>
 
         <ListView x:Name="Playlist" ItemsSource="{Binding Playlist}" SelectedItem="{Binding CurrentlySelectedTrack, Mode=TwoWay}">
